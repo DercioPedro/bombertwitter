@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     // Aplicar headers CORS
     Object.entries(corsHeaders).forEach(([key, value]) => {
         res.setHeader(key, value);
-    });
+    }); 
 
     // Responder requisições OPTIONS (preflight)
     if (req.method === 'OPTIONS') {
