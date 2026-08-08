@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Twitter Mass Messenger</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <script 
-  src="https://www.paypal.com/sdk/js?client-id=BAAoagukf7CNiay3JRPRaKAgGB7W__h5bitHHP49CfNKzLxX08lUO7glk7hItIncw14OBsW44PYBkRzhIo&components=hosted-buttons&disable-funding=venmo&currency=USD">
-</script>
+    
+    <!-- ===== PAYPAL SDK ===== -->
+    <script src="https://www.paypal.com/sdk/js?client-id=BAAoagukf7CNiay3JRPRaKAgGB7W__h5bitHHP49CfNKzLxX08lUO7glk7hItIncw14OBsW44PYBkRzhIo&components=hosted-buttons&disable-funding=venmo&currency=USD">
+    </script>
+    
     <style>
         /* ===== RESET & BASE ===== */
         * {
@@ -138,20 +140,6 @@
         .btn-renew:hover {
             background: #00a06a;
             transform: scale(0.97);
-        }
-
-        .btn-days {
-            background: #f4212e;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .btn-days:hover {
-            background: #d41a26;
         }
 
         .user-card {
@@ -528,10 +516,12 @@
             background: #1a1f26;
             border-radius: 24px;
             padding: 40px;
-            max-width: 500px;
+            max-width: 520px;
             width: 90%;
             text-align: center;
             border: 1px solid #2f3740;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         .payment-modal h2 {
             color: #e7e9ea;
@@ -556,10 +546,8 @@
             margin-bottom: 24px;
             line-height: 1.6;
         }
-        .payment-modal .btn-paypal {
-            width: 100%;
-            padding: 16px;
-            font-size: 18px;
+        .payment-modal .paypal-button-container {
+            margin: 20px 0;
         }
         .payment-modal .btn-close {
             background: transparent;
@@ -568,6 +556,7 @@
             cursor: pointer;
             margin-top: 16px;
             font-size: 14px;
+            padding: 8px 16px;
         }
         .payment-modal .btn-close:hover {
             color: #e7e9ea;
@@ -648,9 +637,9 @@
             <li><i class="fas fa-check-circle"></i> Pagamento seguro via PayPal</li>
         </div>
         
-        <button class="btn-paypal" onclick="payWithPayPal()">
-            <i class="fab fa-paypal"></i> Assinar por $2.00/mês
-        </button>
+        <!-- ===== PAYPAL BUTTON ===== -->
+        <div id="paypal-container-N936UCBXL29ME" class="paypal-button-container"></div>
+        
         <button class="btn-close" onclick="closePayment()">Cancelar</button>
     </div>
 </div>
@@ -682,14 +671,10 @@
         <h2>🔒 Assinatura Necessária</h2>
         <p>Para usar o Mass Messenger, assine por apenas:</p>
         <div class="price">US$ 2.00 <small>/ mês</small></div>
+        <button class="btn-paypal" onclick="openPayment()">
+            <i class="fab fa-paypal"></i> Assinar Agora
+        </button>
     </div>
-
-    <div id="paypal-container-N936UCBXL29ME"></div>
-<script>
-  paypal.HostedButtons({
-    hostedButtonId: "N936UCBXL29ME",
-  }).render("#paypal-container-N936UCBXL29ME")
-</script>
 
     <!-- FORM -->
     <form id="massForm">
@@ -763,20 +748,11 @@ const TWITTER_CONFIG = {
 const API_URL = 'https://bombertwitter.vercel.app/api';
 
 // ============================================================
-//  PAYMENT SYSTEM - ASSINATURA MENSAL
+//  PAYMENT SYSTEM - BOTÃO PAYPAL OFICIAL
 // ============================================================
-const PAYPAL_CONFIG = {
-    // 🔥 CONFIGURE AQUI
-    businessEmail: 'masstwitter4@gmail.com', // Seu email do PayPal
-    returnUrl: 'https://derciopedro.github.io/bombertwitter',
-    currency: 'USD',
-    amount: '2.00',
-    itemName: 'Mass Messenger - Assinatura Mensal',
-};
+// 🔥 SEU HOSTED BUTTON ID DO PAYPAL
+const PAYPAL_BUTTON_ID = 'N936UCBXL29ME';
 
-// ============================================================
-//  PAYMENT FUNCTIONS
-// ============================================================
 function checkSubscription() {
     const username = auth.user?.username;
     if (!username) return { active: false, days: 0 };
@@ -790,7 +766,6 @@ function checkSubscription() {
     const daysLeft = Math.floor((subscription.expires_at - now) / (1000 * 60 * 60 * 24));
     
     if (daysLeft <= 0) {
-        // Assinatura expirou
         delete subscriptions[username];
         localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
         return { active: false, days: 0 };
@@ -806,7 +781,6 @@ function extendSubscription() {
     const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '{}');
     const now = Date.now();
     
-    // Se já tem assinatura ativa, adiciona +30 dias
     const currentExpiry = subscriptions[username]?.expires_at || now;
     const newExpiry = Math.max(currentExpiry, now) + (30 * 24 * 60 * 60 * 1000);
     
@@ -822,39 +796,45 @@ function extendSubscription() {
 
 function openPayment() {
     document.getElementById('paymentOverlay').classList.add('show');
+    
+    // Renderizar o botão do PayPal quando o modal abrir
+    setTimeout(() => {
+        renderPayPalButton();
+    }, 500);
 }
 
 function closePayment() {
     document.getElementById('paymentOverlay').classList.remove('show');
 }
 
-function payWithPayPal() {
-    const username = auth.user?.username;
-    if (!username) {
-        auth.showToast('Faça login primeiro.', 'error');
-        return;
+// ============================================================
+//  RENDERIZAR BOTÃO DO PAYPAL
+// ============================================================
+function renderPayPalButton() {
+    const container = document.getElementById('paypal-container-N936UCBXL29ME');
+    
+    // Limpar container
+    container.innerHTML = '';
+    
+    try {
+        // Renderizar o botão oficial do PayPal
+        paypal.HostedButtons({
+            hostedButtonId: PAYPAL_BUTTON_ID,
+        }).render('#paypal-container-N936UCBXL29ME');
+        
+        console.log('✅ Botão PayPal renderizado com sucesso!');
+    } catch (error) {
+        console.error('❌ Erro ao renderizar botão PayPal:', error);
+        // Fallback: botão alternativo
+        container.innerHTML = `
+            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=${PAYPAL_BUTTON_ID}" 
+               target="_blank" 
+               class="btn-paypal" 
+               style="text-decoration:none;">
+                <i class="fab fa-paypal"></i> Pagar com PayPal
+            </a>
+        `;
     }
-    
-    // Criar URL de pagamento PayPal com assinatura
-    const paypalUrl = `https://www.paypal.com/ncp/payment/BKVNTV54GUUFS` +
-        `cmd=_xclick-subscriptions` +
-        `&business=${PAYPAL_CONFIG.businessEmail}` +
-        `&item_name=Mass%20Messenger%20-%20Assinatura%20Mensal` +
-        `&item_number=${username}` +
-        `&a3=${PAYPAL_CONFIG.amount}` +
-        `&p3=1` +
-        `&t3=M` +
-        `&src=1` +
-        `&sra=1` +
-        `&currency_code=${PAYPAL_CONFIG.currency}` +
-        `&return=${encodeURIComponent(PAYPAL_CONFIG.returnUrl + '?payment=success')}` +
-        `&cancel_return=${encodeURIComponent(PAYPAL_CONFIG.returnUrl + '?payment=cancel')}`;
-    
-    // Abrir PayPal em nova janela
-    window.open(paypalUrl, '_blank');
-    
-    closePayment();
-    auth.showToast('📩 Assinatura iniciada! Complete no PayPal.', 'info');
 }
 
 // ============================================================
@@ -907,7 +887,7 @@ class TwitterAuth {
         const storedState = localStorage.getItem('oauth_state');
         const paymentStatus = urlParams.get('payment');
 
-        // Verificar retorno do PayPal
+        // Verificar retorno do PayPal (por segurança)
         if (paymentStatus === 'success') {
             extendSubscription();
             this.showToast('✅ Assinatura confirmada! Acesso liberado por 30 dias!', 'success');
@@ -1012,7 +992,6 @@ class TwitterAuth {
             document.getElementById('userName').textContent = this.user?.name || 'Usuário';
             document.getElementById('userHandle').textContent = '@' + (this.user?.username || 'username');
 
-            // Verificar assinatura
             const sub = checkSubscription();
             
             if (sub.active) {
@@ -1328,14 +1307,24 @@ async function uploadMedia(file, accessToken) {
 const auth = new TwitterAuth();
 window.auth = auth;
 window.selectedFiles = [];
-window.payWithPayPal = payWithPayPal;
 window.openPayment = openPayment;
 window.closePayment = closePayment;
+
+// Função para confirmar pagamento manual (quando o usuário volta do PayPal)
+function confirmPayment() {
+    if (confirm('✅ Você completou o pagamento? Clique em OK para liberar o acesso.')) {
+        extendSubscription();
+        auth.updateUI();
+        auth.showToast('✅ Acesso liberado!', 'success');
+        closePayment();
+    }
+}
 
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('🚀 Inicializando aplicação...');
     console.log('🔗 API URL:', API_URL);
     console.log('📌 Modo: ASSINATURA MENSAL - US$ 2.00/mês');
+    console.log('🎯 PayPal Button ID:', PAYPAL_BUTTON_ID);
     
     await auth.handleRedirect();
     auth.updateUI();
