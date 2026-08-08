@@ -1,6 +1,4 @@
 {
-    "name": "bombertwitter-backend",
-    "version": "1.0.0",
-    "description": "Backend para autenticação Twitter",
-    "main": "api/token.js"
+    "name": "bombertwitter",
+    "version": "1.0.0"
 }
