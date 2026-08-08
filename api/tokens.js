@@ -1,4 +1,4 @@
-// api/token.js - Backend Vercel
+// api/token.js - Backend Vercel (COMPLETO)
 export default async function handler(req, res) {
     // CORS Headers
     const corsHeaders = {
@@ -11,13 +11,14 @@ export default async function handler(req, res) {
     // Aplicar headers CORS
     Object.entries(corsHeaders).forEach(([key, value]) => {
         res.setHeader(key, value);
-    }); 
+    });
 
     // Responder requisições OPTIONS (preflight)
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
 
+    // Configurações do Twitter
     const TWITTER_CONFIG = {
         clientId: 'NDJvSmxEUFpWcmdhUWJRN3RZZS06MTpjaQ',
         clientSecret: 'YZY1EmQFMLnmO7R-udAjFcfYLJ4vw7QjHt2T59Z8UEKvyV0kLK',
@@ -38,6 +39,7 @@ export default async function handler(req, res) {
 
         console.log('🔄 Trocando código por token...');
 
+        // 🔥 PARTE IMPORTANTE QUE ESTAVA FALTANDO
         const params = new URLSearchParams({
             code: code,
             grant_type: 'authorization_code',
