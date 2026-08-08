@@ -118,6 +118,39 @@
             transform: scale(0.97);
         }
 
+        .btn-renew {
+            background: #00ba7c;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+        }
+        .btn-renew:hover {
+            background: #00a06a;
+            transform: scale(0.97);
+        }
+
+        .btn-days {
+            background: #f4212e;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-days:hover {
+            background: #d41a26;
+        }
+
         .user-card {
             background: #0f1419;
             border-radius: 40px;
@@ -127,6 +160,7 @@
             gap: 14px;
             border: 1px solid #2f3740;
             margin-bottom: 28px;
+            flex-wrap: wrap;
         }
         .user-card.show {
             display: flex;
@@ -159,6 +193,14 @@
         }
         .user-card .paid-badge {
             background: #00ba7c;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 40px;
+        }
+        .user-card .expiring-badge {
+            background: #f4212e;
             color: #fff;
             font-size: 11px;
             font-weight: 600;
@@ -471,7 +513,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -502,6 +544,10 @@
             font-size: 20px;
             color: #8899a6;
         }
+        .payment-modal .price .month {
+            font-size: 16px;
+            color: #8899a6;
+        }
         .payment-modal p {
             color: #8899a6;
             margin-bottom: 24px;
@@ -523,6 +569,51 @@
         .payment-modal .btn-close:hover {
             color: #e7e9ea;
         }
+        .payment-modal .features {
+            text-align: left;
+            padding: 16px 0;
+            border-top: 1px solid #2f3740;
+            border-bottom: 1px solid #2f3740;
+            margin: 16px 0;
+        }
+        .payment-modal .features li {
+            color: #d6d9db;
+            padding: 6px 0;
+            list-style: none;
+        }
+        .payment-modal .features li i {
+            color: #00ba7c;
+            margin-right: 10px;
+        }
+
+        /* ===== SUBSCRIPTION STATUS ===== */
+        .subscription-status {
+            background: #0f1419;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border: 1px solid #2f3740;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .subscription-status .info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .subscription-status .info i {
+            font-size: 20px;
+        }
+        .subscription-status .info .days {
+            color: #8899a6;
+            font-size: 14px;
+        }
+        .subscription-status .info .days strong {
+            color: #e7e9ea;
+        }
 
         @media (max-width: 600px) {
             .container { padding: 20px; }
@@ -539,17 +630,23 @@
 <!-- PAYMENT OVERLAY -->
 <div class="payment-overlay" id="paymentOverlay">
     <div class="payment-modal">
-        <h2>🔓 Liberar Acesso</h2>
-        <p>Pague uma única vez de <strong>US$ 5,00</strong> para usar o Mass Messenger ilimitadamente.</p>
-        <div class="price">$5.00 <small>USD</small></div>
-        <p style="font-size:13px; color:#5a6a7a;">
-            ✅ Acesso vitalício<br>
-            ✅ Envio ilimitado de mensagens<br>
-            ✅ Suporte a imagens<br>
-            ✅ Pagamento seguro via PayPal
-        </p>
+        <h2>🔓 Assinar Mass Messenger</h2>
+        <p>Tenha acesso ilimitado por apenas:</p>
+        <div class="price">
+            $2.00 <small>USD</small>
+            <div class="month">por mês</div>
+        </div>
+        
+        <div class="features">
+            <li><i class="fas fa-check-circle"></i> Envio ilimitado de mensagens</li>
+            <li><i class="fas fa-check-circle"></i> Suporte a imagens (até 4)</li>
+            <li><i class="fas fa-check-circle"></i> Todos os seus grupos e listas</li>
+            <li><i class="fas fa-check-circle"></i> Cancele quando quiser</li>
+            <li><i class="fas fa-check-circle"></i> Pagamento seguro via PayPal</li>
+        </div>
+        
         <button class="btn-paypal" onclick="payWithPayPal()">
-            <i class="fab fa-paypal"></i> Pagar com PayPal
+            <i class="fab fa-paypal"></i> Assinar por $2.00/mês
         </button>
         <button class="btn-close" onclick="closePayment()">Cancelar</button>
     </div>
@@ -574,13 +671,16 @@
         <span class="badge" id="userBadge"><i class="fas fa-check-circle"></i> logado</span>
     </div>
 
+    <!-- SUBSCRIPTION STATUS -->
+    <div id="subscriptionStatus" style="display:none;"></div>
+
     <!-- PAYMENT REQUIRED -->
     <div id="paymentRequired" class="payment-required" style="display:none;">
-        <h2>🔒 Acesso Bloqueado</h2>
-        <p>Para usar o Mass Messenger, você precisa pagar uma única taxa de:</p>
-        <div class="price">US$ 5.00</div>
+        <h2>🔒 Assinatura Necessária</h2>
+        <p>Para usar o Mass Messenger, assine por apenas:</p>
+        <div class="price">US$ 2.00 <small>/ mês</small></div>
         <button class="btn-paypal" onclick="openPayment()">
-            <i class="fab fa-paypal"></i> Liberar Acesso Agora
+            <i class="fab fa-paypal"></i> Assinar Agora
         </button>
     </div>
 
@@ -656,60 +756,61 @@ const TWITTER_CONFIG = {
 const API_URL = 'https://bombertwitter.vercel.app/api';
 
 // ============================================================
-//  PAYMENT SYSTEM
+//  PAYMENT SYSTEM - ASSINATURA MENSAL
 // ============================================================
-// 🔥 CONFIGURE SEU PAYPAL AQUI
 const PAYPAL_CONFIG = {
-    // Substitua pelo seu Client ID do PayPal
-    clientId: 'SEU_CLIENT_ID_PAYPAL_AQUI',
-    
-    // Email para receber os pagamentos
-    businessEmail: 'seu-email@paypal.com',
-    
-    // URL de retorno (para onde o usuário volta após pagar)
+    // 🔥 CONFIGURE AQUI
+    businessEmail: 'seu-email@paypal.com', // Seu email do PayPal
     returnUrl: 'https://derciopedro.github.io/bombertwitter',
-    
-    // Moeda
     currency: 'USD',
-    
-    // Valor
-    amount: '5.00',
+    amount: '2.00',
+    itemName: 'Mass Messenger - Assinatura Mensal',
 };
 
-// Lista de usuários que já pagaram (armazenado no localStorage)
-// CHAVE: username do Twitter
-// VALOR: timestamp do pagamento
-
-function checkPaymentStatus() {
+// ============================================================
+//  PAYMENT FUNCTIONS
+// ============================================================
+function checkSubscription() {
     const username = auth.user?.username;
-    if (!username) return false;
+    if (!username) return { active: false, days: 0 };
     
-    const paidUsers = JSON.parse(localStorage.getItem('paid_users') || '{}');
-    const paymentDate = paidUsers[username];
+    const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '{}');
+    const subscription = subscriptions[username];
     
-    if (!paymentDate) return false;
+    if (!subscription) return { active: false, days: 0 };
     
-    // Pagamento válido por 1 ano (pode ajustar)
-    const oneYear = 365 * 24 * 60 * 60 * 1000;
     const now = Date.now();
+    const daysLeft = Math.floor((subscription.expires_at - now) / (1000 * 60 * 60 * 24));
     
-    if (now - paymentDate > oneYear) {
-        // Pagamento expirou
-        delete paidUsers[username];
-        localStorage.setItem('paid_users', JSON.stringify(paidUsers));
-        return false;
+    if (daysLeft <= 0) {
+        // Assinatura expirou
+        delete subscriptions[username];
+        localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
+        return { active: false, days: 0 };
     }
     
-    return true;
+    return { active: true, days: daysLeft };
 }
 
-function markAsPaid() {
+function extendSubscription() {
     const username = auth.user?.username;
     if (!username) return;
     
-    const paidUsers = JSON.parse(localStorage.getItem('paid_users') || '{}');
-    paidUsers[username] = Date.now();
-    localStorage.setItem('paid_users', JSON.stringify(paidUsers));
+    const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '{}');
+    const now = Date.now();
+    
+    // Se já tem assinatura ativa, adiciona +30 dias
+    const currentExpiry = subscriptions[username]?.expires_at || now;
+    const newExpiry = Math.max(currentExpiry, now) + (30 * 24 * 60 * 60 * 1000);
+    
+    subscriptions[username] = {
+        expires_at: newExpiry,
+        last_payment: now,
+        plan: 'monthly',
+        amount: '2.00',
+    };
+    
+    localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
 }
 
 function openPayment() {
@@ -727,13 +828,17 @@ function payWithPayPal() {
         return;
     }
     
-    // Criar URL de pagamento PayPal
+    // Criar URL de pagamento PayPal com assinatura
     const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?` +
-        `cmd=_xclick` +
+        `cmd=_xclick-subscriptions` +
         `&business=${PAYPAL_CONFIG.businessEmail}` +
-        `&item_name=Mass%20Messenger%20-%20Acesso%20${username}` +
+        `&item_name=Mass%20Messenger%20-%20Assinatura%20Mensal` +
         `&item_number=${username}` +
-        `&amount=${PAYPAL_CONFIG.amount}` +
+        `&a3=${PAYPAL_CONFIG.amount}` +
+        `&p3=1` +
+        `&t3=M` +
+        `&src=1` +
+        `&sra=1` +
         `&currency_code=${PAYPAL_CONFIG.currency}` +
         `&return=${encodeURIComponent(PAYPAL_CONFIG.returnUrl + '?payment=success')}` +
         `&cancel_return=${encodeURIComponent(PAYPAL_CONFIG.returnUrl + '?payment=cancel')}`;
@@ -741,11 +846,8 @@ function payWithPayPal() {
     // Abrir PayPal em nova janela
     window.open(paypalUrl, '_blank');
     
-    // Fechar modal
     closePayment();
-    
-    // Mostrar instruções
-    auth.showToast('📩 Pagamento iniciado! Complete no PayPal e clique em "Voltar ao site".', 'info');
+    auth.showToast('📩 Assinatura iniciada! Complete no PayPal.', 'info');
 }
 
 // ============================================================
@@ -800,9 +902,8 @@ class TwitterAuth {
 
         // Verificar retorno do PayPal
         if (paymentStatus === 'success') {
-            this.showToast('✅ Pagamento confirmado! Acesso liberado!', 'success');
-            markAsPaid();
-            // Remover parâmetro da URL
+            extendSubscription();
+            this.showToast('✅ Assinatura confirmada! Acesso liberado por 30 dias!', 'success');
             window.history.replaceState({}, document.title, window.location.pathname);
             this.updateUI();
         }
@@ -889,6 +990,7 @@ class TwitterAuth {
         const selectAllBtn = document.getElementById('selectAllBtn');
         const groupsContainer = document.getElementById('groupsContainer');
         const paymentRequired = document.getElementById('paymentRequired');
+        const subscriptionStatus = document.getElementById('subscriptionStatus');
         const userBadge = document.getElementById('userBadge');
 
         if (this.isLoggedIn()) {
@@ -903,13 +1005,39 @@ class TwitterAuth {
             document.getElementById('userName').textContent = this.user?.name || 'Usuário';
             document.getElementById('userHandle').textContent = '@' + (this.user?.username || 'username');
 
-            // Verificar se já pagou
-            const hasPaid = checkPaymentStatus();
+            // Verificar assinatura
+            const sub = checkSubscription();
             
-            if (hasPaid) {
-                userBadge.innerHTML = '<i class="fas fa-check-circle"></i> Premium';
+            if (sub.active) {
+                userBadge.innerHTML = `<i class="fas fa-check-circle"></i> Premium`;
                 userBadge.className = 'paid-badge';
                 paymentRequired.style.display = 'none';
+                
+                subscriptionStatus.style.display = 'flex';
+                
+                let statusHtml = '';
+                if (sub.days <= 5) {
+                    statusHtml = `
+                        <div class="subscription-status" style="border-color:#f4212e;">
+                            <div class="info">
+                                <i class="fas fa-exclamation-circle" style="color:#f4212e;"></i>
+                                <span>Sua assinatura expira em <strong style="color:#f4212e;">${sub.days} dias</strong></span>
+                            </div>
+                            <button class="btn-renew" onclick="openPayment()">Renovar agora</button>
+                        </div>
+                    `;
+                } else {
+                    statusHtml = `
+                        <div class="subscription-status" style="border-color:#00ba7c;">
+                            <div class="info">
+                                <i class="fas fa-check-circle" style="color:#00ba7c;"></i>
+                                <span>Assinatura ativa por mais <strong>${sub.days} dias</strong></span>
+                            </div>
+                            <button class="btn-renew" onclick="openPayment()">Renovar</button>
+                        </div>
+                    `;
+                }
+                subscriptionStatus.innerHTML = statusHtml;
                 
                 messageEl.disabled = false;
                 fileInput.disabled = false;
@@ -919,9 +1047,10 @@ class TwitterAuth {
                 
                 this.loadGroups();
             } else {
-                userBadge.innerHTML = '<i class="fas fa-lock"></i> Aguardando Pagamento';
-                userBadge.className = 'badge';
+                userBadge.innerHTML = `<i class="fas fa-clock"></i> Expirado`;
+                userBadge.className = 'expiring-badge';
                 paymentRequired.style.display = 'block';
+                subscriptionStatus.style.display = 'none';
                 
                 messageEl.disabled = true;
                 fileInput.disabled = true;
@@ -931,7 +1060,7 @@ class TwitterAuth {
                 groupsContainer.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-lock"></i>
-                        Faça o pagamento para liberar o acesso
+                        Sua assinatura expirou. Renove para continuar usando.
                     </div>
                 `;
             }
@@ -944,6 +1073,7 @@ class TwitterAuth {
             `;
             userCard.classList.remove('show');
             paymentRequired.style.display = 'none';
+            subscriptionStatus.style.display = 'none';
             messageEl.disabled = true;
             fileInput.disabled = true;
             sendBtn.disabled = true;
@@ -1198,7 +1328,7 @@ window.closePayment = closePayment;
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('🚀 Inicializando aplicação...');
     console.log('🔗 API URL:', API_URL);
-    console.log('📌 Modo: PAGAMENTO (US$ 5.00 via PayPal)');
+    console.log('📌 Modo: ASSINATURA MENSAL - US$ 2.00/mês');
     
     await auth.handleRedirect();
     auth.updateUI();
@@ -1251,8 +1381,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             return;
         }
 
-        if (!checkPaymentStatus()) {
-            auth.showToast('Faça o pagamento para usar o sistema.', 'error');
+        const sub = checkSubscription();
+        if (!sub.active) {
+            auth.showToast('Sua assinatura expirou. Renove para continuar.', 'error');
             openPayment();
             return;
         }
