@@ -1,6 +1,6 @@
-// api/token.js - Backend Vercel (versão API routes)
+// api/token.js - Backend Vercel
 export default async function handler(req, res) {
-    // 🔥 CORS Headers
+    // CORS Headers
     const corsHeaders = {
         'Access-Control-Allow-Origin': 'https://derciopedro.github.io',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -8,10 +8,12 @@ export default async function handler(req, res) {
         'Access-Control-Max-Age': '86400',
     };
 
+    // Aplicar headers CORS
     Object.entries(corsHeaders).forEach(([key, value]) => {
         res.setHeader(key, value);
     });
 
+    // Responder requisições OPTIONS (preflight)
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
@@ -22,6 +24,7 @@ export default async function handler(req, res) {
         redirectUri: 'https://derciopedro.github.io/bombertwitter',
     };
 
+    // Apenas aceita POST
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
