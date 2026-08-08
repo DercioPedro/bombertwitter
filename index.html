@@ -498,11 +498,11 @@ const TWITTER_CONFIG = {
     scope: 'tweet.read tweet.write users.read follows.read offline.access',
 };
 
-// 🔥 URL DO SEU BACKEND NA VERCEL (MODIFICADO)
+// 🔥 URL DO BACKEND NA VERCEL
 const API_URL = 'https://bombertwitter.vercel.app/api';
 
 // ============================================================
-//  GERENCIADOR DE AUTENTICAÇÃO (COM VERCEL)
+//  GERENCIADOR DE AUTENTICAÇÃO
 // ============================================================
 class TwitterAuth {
     constructor() {
@@ -556,7 +556,7 @@ class TwitterAuth {
         if (code && state && state === storedState) {
             console.log('✅ Estado válido! Trocando código por token via Vercel...');
             try {
-                // 🔥 Usando a Vercel para trocar o código por token
+                // 🔥 O BACKEND FAZ TUDO: token + usuário
                 const response = await fetch(API_URL + '/token', {
                     method: 'POST',
                     headers: {
@@ -567,33 +567,21 @@ class TwitterAuth {
 
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(error.error || 'Erro ao trocar código');
+                    throw new Error(error.error || 'Erro ao autenticar');
                 }
 
-                const tokenData = await response.json();
-                this.token = tokenData;
-
-                // Buscar informações do usuário diretamente da API do Twitter
-                const userResponse = await fetch('https://api.twitter.com/2/users/me', {
-                    headers: {
-                        'Authorization': `Bearer ${tokenData.access_token}`
-                    }
-                });
-
-                if (!userResponse.ok) {
-                    throw new Error('Erro ao buscar usuário');
-                }
-
-                const userData = await userResponse.json();
-                if (userData.data) {
-                    this.user = userData.data;
-                    this.isAuthenticated = true;
-                    this.saveToStorage();
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    this.updateUI();
-                    this.showToast('Login realizado com sucesso!', 'success');
-                    return true;
-                }
+                const data = await response.json();
+                
+                // Os dados vêm completos do backend!
+                this.token = data.token;
+                this.user = data.user;
+                this.isAuthenticated = true;
+                
+                this.saveToStorage();
+                window.history.replaceState({}, document.title, window.location.pathname);
+                this.updateUI();
+                this.showToast('Login realizado com sucesso!', 'success');
+                return true;
 
             } catch (error) {
                 console.error('❌ Erro na autenticação:', error);
@@ -846,7 +834,7 @@ function updateStats() {
 // ============================================================
 //  FUNÇÕES DE ENVIO (MOCK - PARA TESTES)
 // ============================================================
-const USE_MOCK = true; // Mude para false quando tiver créditos
+const USE_MOCK = true;
 
 async function sendTweetWithMedia(message, mediaIds, accessToken) {
     if (USE_MOCK) {
@@ -920,13 +908,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     console.log('🚀 Inicializando aplicação...');
     console.log('🔗 API URL:', API_URL);
     
-    // Verifica se há código de retorno do Twitter
     await auth.handleRedirect();
-    
-    // Atualiza UI
     auth.updateUI();
 
-    // Event listeners
     const form = document.getElementById('massForm');
     const messageEl = document.getElementById('message');
     const fileInput = document.getElementById('fileInput');
