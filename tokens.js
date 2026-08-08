@@ -1,5 +1,5 @@
-// api/token.js - Backend para trocar código por token
-export default async function handler(req, res) {
+// token.js - Backend na raiz do projeto
+module.exports = async (req, res) => {
     // Configurar CORS
     res.setHeader('Access-Control-Allow-Origin', 'https://derciopedro.github.io');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -51,4 +51,4 @@ export default async function handler(req, res) {
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
-}
+};
