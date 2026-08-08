@@ -508,7 +508,7 @@ const TWITTER_CONFIG = {
 const API_URL = 'https://bombertwitter.vercel.app/api';
 
 // ============================================================
-//  GERENCIADOR DE AUTENTICAÇÃO
+//  GERENCIADOR DE AUTENTICAÇÃO - MODO PÚBLICO
 // ============================================================
 class TwitterAuth {
     constructor() {
@@ -584,7 +584,7 @@ class TwitterAuth {
                 this.saveToStorage();
                 window.history.replaceState({}, document.title, window.location.pathname);
                 this.updateUI();
-                this.showToast('Login realizado com sucesso!', 'success');
+                this.showToast(`✅ Bem-vindo, ${this.user?.name}! Login realizado com sucesso!`, 'success');
                 return true;
 
             } catch (error) {
@@ -741,7 +741,7 @@ class TwitterAuth {
         if (!token) return [];
 
         try {
-            // Busca as listas que o usuário segue (LISTAS REAIS)
+            // Busca as listas que o usuário segue
             const response = await fetch('https://api.twitter.com/2/users/me/followed_lists', {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -752,7 +752,6 @@ class TwitterAuth {
                 const error = await response.json();
                 console.error('Erro da API:', error);
                 
-                // Se for erro de falta de créditos
                 if (response.status === 429 || response.status === 403) {
                     throw new Error('Limite de créditos excedido ou plano gratuito sem acesso a listas');
                 }
@@ -768,29 +767,6 @@ class TwitterAuth {
                     name: list.name,
                     members: list.member_count || 0
                 }));
-            }
-            
-            // Se não houver listas, tenta buscar comunidades (se disponível)
-            try {
-                const communitiesResponse = await fetch('https://api.twitter.com/2/users/me/communities', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                if (communitiesResponse.ok) {
-                    const communitiesData = await communitiesResponse.json();
-                    if (communitiesData.data && communitiesData.data.length > 0) {
-                        return communitiesData.data.map(c => ({
-                            id: c.id,
-                            name: c.name,
-                            members: c.member_count || 0
-                        }));
-                    }
-                }
-            } catch (e) {
-                // Comunidades podem não estar disponíveis
-                console.log('Comunidades não disponíveis');
             }
             
             return [];
@@ -871,9 +847,9 @@ function updateStats() {
 }
 
 // ============================================================
-//  FUNÇÕES DE ENVIO (REAL - SEM MOCK)
+//  FUNÇÕES DE ENVIO - MODO PÚBLICO
 // ============================================================
-const USE_MOCK = false; // AGORA É FALSE - USA API REAL!
+const USE_MOCK = false; // FALSE = USA API REAL
 
 async function sendTweetWithMedia(message, mediaIds, accessToken) {
     try {
@@ -943,7 +919,7 @@ window.selectedFiles = [];
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('🚀 Inicializando aplicação...');
     console.log('🔗 API URL:', API_URL);
-    console.log('📌 Modo: REAL (sem mock)');
+    console.log('📌 Modo: PÚBLICO (qualquer usuário pode usar)');
     
     await auth.handleRedirect();
     auth.updateUI();
@@ -1039,7 +1015,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             for (const checkbox of selectedGroups) {
                 const groupName = checkbox.parentElement.querySelector('.g-name').textContent;
                 
-                // Envia o tweet com o nome do grupo
                 await sendTweetWithMedia(
                     message,
                     mediaIds,
@@ -1050,7 +1025,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const percent = (sent / totalGroups) * 100;
                 progressFill.style.width = percent + '%';
                 
-                // Pequeno delay para respeitar rate limits
                 await new Promise(r => setTimeout(r, 1000));
             }
 
