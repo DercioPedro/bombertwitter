@@ -2,7 +2,7 @@
 export default async function handler(req, res) {
     // CORS Headers
     const corsHeaders = {
-        'Access-Control-Allow-Origin': 'https://derciopedro.github.io',
+        'Access-Control-Allow-Origin': 'https://derciopedro.github.io', 
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Max-Age': '86400',
