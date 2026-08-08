@@ -1,23 +1,30 @@
-// token.js - Backend para Vercel
+// token.js - Backend Vercel com CORS corrigido
 module.exports = async (req, res) => {
-    // Configurar CORS
-    res.setHeader('Access-Control-Allow-Origin', 'https://derciopedro.github.io');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    // 🔥 CORS Headers CORRETOS
+    const corsHeaders = {
+        'Access-Control-Allow-Origin': 'https://derciopedro.github.io',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Max-Age': '86400',
+    };
 
-    // Responde requisições OPTIONS (preflight)
+    // Aplicar headers CORS em todas as respostas
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+        res.setHeader(key, value);
+    });
+
+    // Responder requisições OPTIONS (preflight)
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
 
-    // Suas credenciais
     const TWITTER_CONFIG = {
         clientId: 'NDJvSmxEUFpWcmdhUWJRN3RZZS06MTpjaQ',
         clientSecret: 'YZY1EmQFMLnmO7R-udAjFcfYLJ4vw7QjHt2T59Z8UEKvyV0kLK',
         redirectUri: 'https://derciopedro.github.io/bombertwitter',
     };
 
-    // Apenas POST
+    // Apenas aceita POST
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
